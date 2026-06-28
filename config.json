@@ -36,5 +36,6 @@
       "type": "video",
       "duration": 60
     }
-  ]
+  ],
+  "password": "changeme"
 }

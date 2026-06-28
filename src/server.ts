@@ -6,16 +6,40 @@ const app = new Hono();
 let channels: Channel[] = [];
 let fillers: Filler[] = [];
 let fillerInterval = 5;
+let authPassword = '';
+
+// Basic auth middleware
+app.use('*', async (c, next) => {
+  if (!authPassword) return next();
+
+  const auth = c.req.header('Authorization');
+  if (!auth || !auth.startsWith('Basic ')) {
+    return c.text('Unauthorized', 401, {
+      'WWW-Authenticate': 'Basic realm="RobbdeezeNutz Streams"',
+    });
+  }
+
+  const decoded = atob(auth.slice(6));
+  const password = decoded.split(':')[1];
+  if (password !== authPassword) {
+    return c.text('Unauthorized', 401, {
+      'WWW-Authenticate': 'Basic realm="RobbdeezeNutz Streams"',
+    });
+  }
+
+  return next();
+});
 
 export const stats: Stats = {
   totalPlays: 0,
   fillerPlays: 0
 };
 
-export function initServer(ch: Channel[], f: Filler[], interval: number) {
+export function initServer(ch: Channel[], f: Filler[], interval: number, configPassword?: string) {
   channels = ch;
   fillers = f;
   fillerInterval = interval;
+  authPassword = process.env.PASSWORD || configPassword || '';
 }
 
 app.get('/', (c) => {

@@ -31,6 +31,7 @@ export interface Config {
   branding: Branding;
   m3us: Array<{ name: string; url: string }>;
   fillers: Filler[];
+  password?: string;
 }
 
 export interface Stats {

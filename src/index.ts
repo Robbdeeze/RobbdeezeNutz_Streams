@@ -58,7 +58,7 @@ async function main() {
     process.exit(1);
   }
 
-  initServer(channels, config.fillers, config.fillerInterval);
+  initServer(channels, config.fillers, config.fillerInterval, config.password);
   const port = config.port;
 
   serve({
