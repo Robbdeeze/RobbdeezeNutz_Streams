@@ -33,9 +33,10 @@ jobs:
           push: true
           tags: ${{ env.IMAGE_TAG }}
 
+      - name: Install flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@v1
+
       - name: Deploy to Fly.io
-        uses: superfly/flyctl-actions@v1
-        with:
-          args: deploy --image ${{ env.IMAGE_TAG }}
+        run: flyctl deploy --image ${{ env.IMAGE_TAG }} --remote-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
