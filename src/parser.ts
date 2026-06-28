@@ -20,18 +20,18 @@ export function parseM3UText(content: string): M3UEntry[] {
     if (!line || line === '#EXTM3U') continue
 
     if (line.startsWith('#EXTINF:')) {
-      const match = line.match(
-        /#EXTINF:(?:-?\d+(?:\.\d+)?),?(.*)/
-      )
       const durationMatch = line.match(
         /#EXTINF:(-?\d+(?:\.\d+)?)/
       )
-
-      const title = match?.[1]?.trim() ?? 'Unknown'
       const duration = durationMatch ? parseFloat(durationMatch[1]) : 0
 
+      const tvgNameMatch = line.match(/tvg-name="([^"]*)"/)
       const genreMatch = line.match(/group-title="([^"]*)"/)
       const logoMatch = line.match(/tvg-logo="([^"]*)"/)
+
+      const lastComma = line.lastIndexOf(',')
+      const rawTitle = lastComma !== -1 ? line.slice(lastComma + 1).trim() : 'Unknown'
+      const title = tvgNameMatch?.[1] ?? rawTitle
 
       currentExtInf = {
         title,

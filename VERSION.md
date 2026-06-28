@@ -2,6 +2,24 @@
 
 ## v0.1.0 — 2026-06-28
 
+### Verified Working
+- [x] TypeScript builds with zero errors (strict mode)
+- [x] M3U parsing: **6,349 movies** + **6,660 TV shows** loaded
+- [x] Dashboard served at `http://localhost:3000`
+- [x] M3U playlist endpoint (`/channels.m3u`) working
+- [x] Stats API (`/api/stats`) returning clean JSON
+- [x] Title extraction fixed (tvg-name / last-comma fallback)
+- [x] Docker build and compose configured
+- [x] Pushed to GitHub (`origin/main`)
+
+### Configuration (`config.json`)
+| Key | Value |
+|-----|-------|
+| `server.port` | 3000 |
+| `branding.text` | "RobbdeezeNutz" |
+| `channels[0].name` | Movies — `movies.m3u` (6,349 entries) |
+| `channels[1].name` | TV Shows — `tv-shows.m3u` (6,660 entries) |
+
 ### Description
 A lightweight self-hosted tool that turns remote VOD M3U playlists into linear TV channels with fillers (AI art / promos), branding overlays, and a web dashboard.
 

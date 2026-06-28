@@ -12,10 +12,10 @@
   },
   "channels": [
     {
-      "id": "movies-action",
-      "name": "Action Movies",
-      "m3uUrl": "",
-      "genre": "action",
+      "id": "movies",
+      "name": "Movies",
+      "m3uUrl": "https://raw.githubusercontent.com/Robbdeeze/iptv/master/streams/vod/movies.m3u",
+      "genre": "movies",
       "fillerIntervalMs": 300000,
       "fillers": [
         "https://picsum.photos/1920/1080?random=1",
@@ -23,25 +23,14 @@
       ]
     },
     {
-      "id": "movies-comedy",
-      "name": "Comedy Movies",
-      "m3uUrl": "",
-      "genre": "comedy",
+      "id": "tv-shows",
+      "name": "TV Shows",
+      "m3uUrl": "https://raw.githubusercontent.com/Robbdeeze/iptv/master/streams/vod/tv-shows.m3u",
+      "genre": "tv",
       "fillerIntervalMs": 300000,
       "fillers": [
         "https://picsum.photos/1920/1080?random=3",
         "https://picsum.photos/1920/1080?random=4"
-      ]
-    },
-    {
-      "id": "tv-shows",
-      "name": "TV Shows",
-      "m3uUrl": "",
-      "genre": "tv",
-      "fillerIntervalMs": 600000,
-      "fillers": [
-        "https://picsum.photos/1920/1080?random=5",
-        "https://picsum.photos/1920/1080?random=6"
       ]
     }
   ],
