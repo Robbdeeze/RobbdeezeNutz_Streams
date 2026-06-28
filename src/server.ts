@@ -51,7 +51,7 @@ export function initServer(ch: Channel[], f: Filler[], interval: number, configP
   channels = ch;
   fillers = f;
   fillerInterval = interval;
-  authPassword = process.env.PASSWORD || configPassword || '';
+  authPassword = configPassword || '';
 }
 
 app.get('/', (c) => {
@@ -136,22 +136,40 @@ app.get('/resolve', async (c) => {
 });
 
 async function resolveMediaUrl(subdirPath: string): Promise<string | null> {
-  try {
-    const res = await request(`https://a.111477.xyz${subdirPath}`, { headers: PROXY_HEADERS });
-    const body = await res.body.text();
-    const regex = /href="([^"]+)"/g;
-    let match;
-    while ((match = regex.exec(body)) !== null) {
-      const h = match[1];
-      const ext = h.substring(h.lastIndexOf('.')).toLowerCase();
-      if (MEDIA_EXT.has(ext)) {
-        return `https://a.111477.xyz${h}`;
+  // Retry up to 3 times with delay to handle Cloudflare challenges
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const res = await request(`https://a.111477.xyz${subdirPath}`, { headers: PROXY_HEADERS });
+      const body = await res.body.text();
+
+      // Detect Cloudflare challenge page
+      if (body.includes('cdn-cgi/challenge-platform') || body.includes('Just a moment')) {
+        if (attempt < 2) {
+          await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
+          continue;
+        }
+        return null;
       }
+
+      const regex = /href="([^"]+)"/g;
+      let match;
+      while ((match = regex.exec(body)) !== null) {
+        const h = match[1];
+        const ext = h.substring(h.lastIndexOf('.')).toLowerCase();
+        if (MEDIA_EXT.has(ext)) {
+          return `https://a.111477.xyz${h}`;
+        }
+      }
+      return null;
+    } catch {
+      if (attempt < 2) {
+        await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
+        continue;
+      }
+      return null;
     }
-    return null;
-  } catch {
-    return null;
   }
+  return null;
 }
 
 app.get('/channel/:id', (c) => {
