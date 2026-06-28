@@ -1,41 +1,36 @@
 {
-  "server": {
-    "port": 3000,
-    "host": "0.0.0.0"
-  },
+  "port": 3000,
+  "fillerInterval": 4,
   "branding": {
-    "text": "RobbdeezeNutz",
-    "fontSize": 24,
-    "fontColor": "white",
-    "position": "bottom-right",
-    "opacity": 0.8
+    "text": "RobbdeezeNutz_Streams",
+    "color": "white",
+    "position": "bottom"
   },
-  "channels": [
+  "m3us": [
     {
-      "id": "movies",
       "name": "Movies",
-      "m3uUrl": "https://raw.githubusercontent.com/Robbdeeze/iptv/master/streams/vod/movies.m3u",
-      "genre": "movies",
-      "fillerIntervalMs": 300000,
-      "fillers": [
-        "https://picsum.photos/1920/1080?random=1",
-        "https://picsum.photos/1920/1080?random=2"
-      ]
+      "url": "https://raw.githubusercontent.com/Robbdeeze/iptv/master/streams/vod/movies.m3u"
     },
     {
-      "id": "tv-shows",
       "name": "TV Shows",
-      "m3uUrl": "https://raw.githubusercontent.com/Robbdeeze/iptv/master/streams/vod/tv-shows.m3u",
-      "genre": "tv",
-      "fillerIntervalMs": 300000,
-      "fillers": [
-        "https://picsum.photos/1920/1080?random=3",
-        "https://picsum.photos/1920/1080?random=4"
-      ]
+      "url": "https://raw.githubusercontent.com/Robbdeeze/iptv/master/streams/vod/tv-shows.m3u"
     }
   ],
-  "fillers": {
-    "slideshowDurationMs": 10000,
-    "imageUrl": "https://picsum.photos/1920/1080"
-  }
+  "fillers": [
+    {
+      "url": "https://example.com/your-ai-art-1.jpg",
+      "type": "image",
+      "duration": 30
+    },
+    {
+      "url": "https://example.com/your-ai-art-2.jpg",
+      "type": "image",
+      "duration": 45
+    },
+    {
+      "url": "https://example.com/promo-video.mp4",
+      "type": "video",
+      "duration": 60
+    }
+  ]
 }

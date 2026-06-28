@@ -1,9 +1,8 @@
 services:
-  streams:
+  robbdeeze-nutz-streams:
     build: .
-    container_name: robbdeeze-streams
     ports:
       - "3000:3000"
     volumes:
-      - ./config.json:/app/config.json:ro
+      - ./config.json:/app/config.json
     restart: unless-stopped

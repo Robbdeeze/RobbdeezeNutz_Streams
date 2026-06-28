@@ -1,59 +1,54 @@
-import { serve } from '@hono/node-server'
-import { loadConfig } from './config.js'
-import { parseM3U } from './parser.js'
-import { createServer } from './server.js'
-import type { ChannelState } from './types.js'
+import { serve } from '@hono/node-server';
+import { loadConfig } from './config.js';
+import { fetchM3U } from './parser.js';
+import app, { initServer } from './server.js';
+import type { Channel, M3UEntry } from './types.js';
 
+async function main() {
+  const config = loadConfig();
+  console.log('Successfully initialized configuration profile.');
 
-const config = loadConfig()
-const channels = new Map<string, ChannelState>()
-
-for (const ch of config.channels) {
-  channels.set(ch.id, {
-    config: ch,
-    entries: [],
-    currentIndex: 0,
-    isFiller: false,
-    fillerIndex: 0,
-  })
-}
-
-async function loadChannelEntries() {
-  for (const [, state] of channels) {
+  let allEntries: M3UEntry[] = [];
+  for (const source of config.m3us) {
     try {
-      const entries = await parseM3U(state.config.m3uUrl)
-      state.entries = entries
-      state.currentIndex = 0
-      console.log(`[${state.config.name}] Loaded ${entries.length} entries`)
+      console.log(`Fetching remote entries from playlist source: ${source.name}...`);
+      const entries = await fetchM3U(source.url);
+      allEntries = allEntries.concat(entries);
+      console.log(`  Loaded ${entries.length} entries from ${source.name}`);
     } catch (err) {
-      console.warn(`[${state.config.name}] Failed to load M3U:`, err)
+      console.error(`Error parsing source ${source.name}:`, err);
     }
   }
+
+  const movieGenres = new Map<string, M3UEntry[]>();
+  allEntries.forEach(item => {
+    const genre = (item.groupTitle || 'General').trim();
+    if (!movieGenres.has(genre)) movieGenres.set(genre, []);
+    movieGenres.get(genre)!.push(item);
+  });
+
+  const channels: Channel[] = [
+    { id: 'main', name: 'Main Unified Channel', entries: allEntries, currentIndex: 0 },
+    ...Array.from(movieGenres.entries()).slice(0, 5).map(([genre, entries]) => ({
+      id: `genre-${genre.toLowerCase().replace(/\s+/g, '-')}`,
+      name: `${genre} Block`,
+      entries,
+      currentIndex: 0
+    }))
+  ];
+
+  initServer(channels, config.fillers, config.fillerInterval);
+  const port = config.port;
+
+  serve({
+    fetch: (req) => {
+      channels.forEach(ch => { ch.currentIndex++; });
+      return app.fetch(req);
+    },
+    port
+  });
+
+  console.log(`RobbdeezeNutz_Streams running seamlessly at http://localhost:${port}`);
 }
 
-function cycleChannels() {
-  for (const [, state] of channels) {
-    if (state.entries.length === 0) continue
-    state.currentIndex = (state.currentIndex + 1) % state.entries.length
-    console.log(`[${state.config.name}] Now playing: ${state.entries[state.currentIndex]?.title}`)
-  }
-}
-
-async function start() {
-  await loadChannelEntries()
-
-  if (channels.size > 0) {
-    setInterval(cycleChannels, 60_000 * 30)
-    setInterval(loadChannelEntries, 60_000 * 60)
-  }
-
-  const app = createServer(config, channels)
-
-  console.log(`Server starting on ${config.server.host}:${config.server.port}`)
-  serve(app, (info: { port: number }) => {
-    console.log(`Dashboard: http://localhost:${info.port}`)
-    console.log(`M3U:       http://localhost:${info.port}/channels.m3u`)
-  })
-}
-
-start().catch(console.error)
+main().catch(console.error);
