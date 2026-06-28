@@ -9,15 +9,15 @@
   "m3us": [
     {
       "name": "Movies",
-      "url": "https://raw.githubusercontent.com/Robbdeeze/iptv/master/streams/vod/movies.m3u"
+      "url": "/www/movies.m3u"
     },
     {
       "name": "TV Shows",
-      "url": "https://raw.githubusercontent.com/Robbdeeze/iptv/master/streams/vod/tv-shows.m3u"
+      "url": "/www/tv-shows.m3u"
     },
     {
-      "name": "Black TV Shows",
-      "url": ""
+      "name": "Anime",
+      "url": "/www/anime.m3u"
     }
   ],
   "fillers": [

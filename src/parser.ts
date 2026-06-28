@@ -1,8 +1,21 @@
 import type { M3UEntry } from './types.js';
+import { readFileSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
 
 export async function fetchM3U(url: string): Promise<M3UEntry[]> {
-  const res = await fetch(url);
-  const text = await res.text();
+  let text: string;
+
+  if (url.startsWith('/www/')) {
+    const filePath = join(process.cwd(), url.slice(1));
+    if (!existsSync(filePath)) {
+      throw new Error(`M3U file not found: ${filePath}`);
+    }
+    text = readFileSync(filePath, 'utf-8');
+  } else {
+    const res = await fetch(url);
+    text = await res.text();
+  }
+
   return parseM3U(text);
 }
 

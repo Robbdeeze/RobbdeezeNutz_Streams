@@ -1,4 +1,7 @@
 import { Hono } from 'hono';
+import { request } from 'undici';
+import { readFileSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
 import type { Channel, Filler, Stats } from './types.js';
 import { loadConfig } from './config.js';
 
@@ -7,6 +10,15 @@ let channels: Channel[] = [];
 let fillers: Filler[] = [];
 let fillerInterval = 5;
 let authPassword = '';
+
+const MEDIA_EXT = new Set(['.mp4', '.mkv', '.avi', '.mov', '.webm']);
+const RESOLVE_CACHE = new Map<string, { url: string; ts: number }>();
+const CACHE_TTL = 30 * 60 * 1000; // 30 minutes
+
+const PROXY_HEADERS = {
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+  'Accept': 'text/html,application/xhtml+xml',
+};
 
 // Basic auth middleware
 app.use('*', async (c, next) => {
@@ -88,6 +100,59 @@ app.get('/channels.m3u', (c) => {
   });
   return c.text(m3u, 200, { 'Content-Type': 'text/plain' });
 });
+
+app.get('/www/:file', (c) => {
+  const file = c.req.param('file');
+  const wwwDir = join(process.cwd(), 'www');
+  const filePath = join(wwwDir, file);
+
+  // Prevent path traversal
+  if (!filePath.startsWith(wwwDir) || !filePath.endsWith('.m3u')) {
+    return c.text('Forbidden', 403);
+  }
+
+  if (!existsSync(filePath)) {
+    return c.text('Not found', 404);
+  }
+
+  const content = readFileSync(filePath, 'utf-8');
+  return c.text(content, 200, { 'Content-Type': 'text/plain' });
+});
+
+app.get('/resolve', async (c) => {
+  const path = c.req.query('path');
+  if (!path) return c.text('Missing path', 400);
+
+  const cached = RESOLVE_CACHE.get(path);
+  if (cached && Date.now() - cached.ts < CACHE_TTL) {
+    return c.redirect(cached.url);
+  }
+
+  const mediaUrl = await resolveMediaUrl(path);
+  if (!mediaUrl) return c.text('No playable media found at ' + path, 404);
+
+  RESOLVE_CACHE.set(path, { url: mediaUrl, ts: Date.now() });
+  return c.redirect(mediaUrl);
+});
+
+async function resolveMediaUrl(subdirPath: string): Promise<string | null> {
+  try {
+    const res = await request(`https://a.111477.xyz${subdirPath}`, { headers: PROXY_HEADERS });
+    const body = await res.body.text();
+    const regex = /href="([^"]+)"/g;
+    let match;
+    while ((match = regex.exec(body)) !== null) {
+      const h = match[1];
+      const ext = h.substring(h.lastIndexOf('.')).toLowerCase();
+      if (MEDIA_EXT.has(ext)) {
+        return `https://a.111477.xyz${h}`;
+      }
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
 
 app.get('/channel/:id', (c) => {
   const id = c.req.param('id');
