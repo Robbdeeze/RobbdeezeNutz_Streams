@@ -1,0 +1,52 @@
+{
+  "server": {
+    "port": 3000,
+    "host": "0.0.0.0"
+  },
+  "branding": {
+    "text": "RobbdeezeNutz",
+    "fontSize": 24,
+    "fontColor": "white",
+    "position": "bottom-right",
+    "opacity": 0.8
+  },
+  "channels": [
+    {
+      "id": "movies-action",
+      "name": "Action Movies",
+      "m3uUrl": "",
+      "genre": "action",
+      "fillerIntervalMs": 300000,
+      "fillers": [
+        "https://picsum.photos/1920/1080?random=1",
+        "https://picsum.photos/1920/1080?random=2"
+      ]
+    },
+    {
+      "id": "movies-comedy",
+      "name": "Comedy Movies",
+      "m3uUrl": "",
+      "genre": "comedy",
+      "fillerIntervalMs": 300000,
+      "fillers": [
+        "https://picsum.photos/1920/1080?random=3",
+        "https://picsum.photos/1920/1080?random=4"
+      ]
+    },
+    {
+      "id": "tv-shows",
+      "name": "TV Shows",
+      "m3uUrl": "",
+      "genre": "tv",
+      "fillerIntervalMs": 600000,
+      "fillers": [
+        "https://picsum.photos/1920/1080?random=5",
+        "https://picsum.photos/1920/1080?random=6"
+      ]
+    }
+  ],
+  "fillers": {
+    "slideshowDurationMs": 10000,
+    "imageUrl": "https://picsum.photos/1920/1080"
+  }
+}
