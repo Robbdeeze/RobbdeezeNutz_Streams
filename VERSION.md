@@ -95,3 +95,104 @@ docker compose up --build
 # Dashboard: http://localhost:3000
 # M3U:      http://localhost:3000/channels.m3u
 ```
+
+### Complete Setup Instructions
+
+#### 1. Clone & Install
+```bash
+git clone https://github.com/Robbdeeze/RobbdeezeNutz_Streams.git
+cd RobbdeezeNutz_Streams
+npm install
+```
+
+#### 2. Configure `config.json`
+
+**Channels** — Add your M3U playlist URLs:
+```json
+{
+  "id": "movies",
+  "name": "Movies",
+  "m3uUrl": "https://raw.githubusercontent.com/your-user/your-repo/main/streams/vod/movies.m3u",
+  "genre": "movies",
+  "fillerIntervalMs": 300000,
+  "fillers": ["https://picsum.photos/1920/1080?random=1"]
+}
+```
+
+**Branding** — Customize the on-screen text overlay:
+```json
+{
+  "text": "RobbdeezeNutz",
+  "fontSize": 24,
+  "fontColor": "white",
+  "position": "bottom-right",
+  "opacity": 0.8
+}
+```
+
+**Fillers** — Add filler image URLs (shows between programs):
+```json
+"fillers": [
+  "https://picsum.photos/1920/1080?random=1",
+  "https://your-server.com/promo1.jpg"
+]
+```
+
+#### 3. Run
+
+**Option A — Docker (recommended):**
+```bash
+docker compose up --build
+```
+
+**Option B — Local dev:**
+```bash
+npm run dev
+```
+
+**Option C — Build & serve:**
+```bash
+npm run build
+npm start
+```
+
+#### 4. Add to IPTV Client
+
+**VLC:** `Media > Open Network Stream > http://localhost:3000/channels.m3u`
+
+**TiviMate:** Add playlist URL `http://your-server-ip:3000/channels.m3u`
+
+**Jellyfin/Plex:** Add as M3U tuner or HDHomeRun (Tunarr-compatible)
+
+#### 5. Watching Streams
+
+- Click "Watch Stream" on any channel card in the dashboard
+- Or open `http://localhost:3000/stream/movies` directly in VLC
+- The stream includes your branding text overlay via FFmpeg
+
+#### 6. Monitoring
+
+- **Dashboard:** `http://localhost:3000` — see channel stats and stream status
+- **API:** `http://localhost:3000/api/stats` — JSON stats for monitoring
+- Channels auto-cycle every 30 minutes; M3U playlists auto-reload every 60 minutes
+
+#### 7. Updating M3U URLs
+
+Edit `config.json` and restart (Docker: `docker compose restart`, Local: restart the process). The server also auto-reloads M3U playlists every 60 minutes.
+
+#### 8. Troubleshooting
+
+| Problem | Fix |
+|---------|-----|
+| "0 entries loaded" | Check `m3uUrl` is correct and reachable |
+| Stream won't play | Ensure FFmpeg is installed (`ffmpeg -version`) |
+| Branding not showing | Check `fontfile` path in overlay.ts matches your system |
+| Docker build fails | Ensure Docker is running and you have internet |
+| Port conflict | Change `server.port` in config.json |
+
+#### 9. Current Production Channels
+
+| Channel | Source | Entries |
+|---------|--------|---------|
+| Movies | `movies.m3u` | 6,349 |
+| TV Shows | `tv-shows.m3u` | 6,660 |
