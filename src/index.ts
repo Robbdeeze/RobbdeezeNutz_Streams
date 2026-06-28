@@ -8,34 +8,55 @@ async function main() {
   const config = loadConfig();
   console.log('Successfully initialized configuration profile.');
 
-  let allEntries: M3UEntry[] = [];
+  const channels: Channel[] = [];
+
   for (const source of config.m3us) {
+    let entries: M3UEntry[] = [];
     try {
       console.log(`Fetching remote entries from playlist source: ${source.name}...`);
-      const entries = await fetchM3U(source.url);
-      allEntries = allEntries.concat(entries);
+      entries = await fetchM3U(source.url);
       console.log(`  Loaded ${entries.length} entries from ${source.name}`);
     } catch (err) {
       console.error(`Error parsing source ${source.name}:`, err);
+      continue;
     }
-  }
 
-  const movieGenres = new Map<string, M3UEntry[]>();
-  allEntries.forEach(item => {
-    const genre = (item.groupTitle || 'General').trim();
-    if (!movieGenres.has(genre)) movieGenres.set(genre, []);
-    movieGenres.get(genre)!.push(item);
-  });
+    if (entries.length === 0) continue;
 
-  const channels: Channel[] = [
-    { id: 'main', name: 'Main Unified Channel', entries: allEntries, currentIndex: 0 },
-    ...Array.from(movieGenres.entries()).slice(0, 5).map(([genre, entries]) => ({
-      id: `genre-${genre.toLowerCase().replace(/\s+/g, '-')}`,
-      name: `${genre} Block`,
+    const sourceId = source.name.toLowerCase().replace(/\s+/g, '-');
+
+    channels.push({
+      id: sourceId,
+      name: source.name,
       entries,
       currentIndex: 0
-    }))
-  ];
+    });
+
+    const genreMap = new Map<string, M3UEntry[]>();
+    entries.forEach(item => {
+      const genre = (item.groupTitle || 'General').trim();
+      if (!genreMap.has(genre)) genreMap.set(genre, []);
+      genreMap.get(genre)!.push(item);
+    });
+
+    const genreChannels = Array.from(genreMap.entries())
+      .filter(([, genreEntries]) => genreEntries.length >= 3)
+      .slice(0, 5)
+      .map(([genre, genreEntries]) => ({
+        id: `${sourceId}-${genre.toLowerCase().replace(/\s+/g, '-')}`,
+        name: `${source.name} - ${genre}`,
+        entries: genreEntries,
+        currentIndex: 0
+      }));
+
+    channels.push(...genreChannels);
+    console.log(`  Created ${1 + genreChannels.length} channels for ${source.name}`);
+  }
+
+  if (channels.length === 0) {
+    console.error('No channels could be created — check your M3U URLs.');
+    process.exit(1);
+  }
 
   initServer(channels, config.fillers, config.fillerInterval);
   const port = config.port;
@@ -49,6 +70,7 @@ async function main() {
   });
 
   console.log(`RobbdeezeNutz_Streams running seamlessly at http://localhost:${port}`);
+  console.log(`Active channels: ${channels.map(ch => ch.name).join(', ')}`);
 }
 
 main().catch(console.error);
