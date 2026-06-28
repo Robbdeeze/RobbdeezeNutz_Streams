@@ -266,25 +266,56 @@ docker compose restart   # Docker
 
 Start local to test. If you want people outside your house to watch, use Fly.io.
 
+### CI/CD Pipeline (GitHub → Fly.io)
+Every push to `main` automatically:
+1. Builds Docker image → pushes to `ghcr.io/robbdeeze/robbdeezenutz_streams:latest`
+2. Deploys to Fly.io → updates your public URL
+
 #### 9. Cloud Deployment
 
-**Fly.io (free — recommended):**
-```bash
-# One-time setup
-flyctl auth signup
-flyctl launch --copy-config
-flyctl deploy
+**Fly.io (free — recommended):** Fully automated from GitHub.
 
-# Your public URL:
-# https://robbdeezenutz-streams.fly.dev
+**One-time setup (run from your computer once):**
+```bash
+# 1. Install flyctl
+curl -L https://fly.io/install.sh | sh
+
+# 2. Sign up (free, requires credit card for identity verification, no charges)
+flyctl auth signup
+
+# 3. Create the Fly.io app
+flyctl launch --copy-config --no-deploy
+
+# 4. Generate API token
+flyctl auth token
+# → Copy the output token string
+
+# 5. Add token to GitHub
+#    Go to: GitHub repo → Settings → Secrets and variables → Actions
+#    Click "New repository secret"
+#    Name: FLY_API_TOKEN
+#    Value: paste the token from step 4
 ```
 
-**Railway (free):**
+**After setup — fully automatic:**
+```
+git push → GitHub Actions builds → deploys to Fly.io
+```
+
+**Your public URLs:**
+```
+Dashboard: https://robbdeezenutz-streams.fly.dev
+M3U:       https://robbdeezenutz-streams.fly.dev/channels.m3u
+Channel:   https://robbdeezenutz-streams.fly.dev/channel/movies
+```
+
+**In VLC/TiviMate:** Use the M3U URL above instead of `localhost`.
+
+**Railway (alternative — also free, no credit card needed):**
 1. Go to https://railway.app
 2. "New Project" → "Deploy from GitHub repo"
 3. Select this repo, set port to 3000
-
-**GitHub Actions** auto-builds the Docker image to `ghcr.io/robbdeeze/robbdeezenutz_streams:latest` on every push to `main`.
+4. Auto-deploys on every push, no setup needed
 
 #### 10. Troubleshooting
 | Problem | Fix |
