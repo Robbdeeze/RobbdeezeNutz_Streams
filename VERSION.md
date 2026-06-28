@@ -16,6 +16,8 @@ A lightweight self-hosted utility designed to transform remote VOD M3U playlists
 - [x] Filler/commercial injection every N plays (configurable)
 - [x] Play stats tracking (total plays + filler plays)
 - [x] Docker build and compose configured
+- [x] GitHub Actions CI: auto-builds Docker image to ghcr.io on every push
+- [x] Fly.io deployment config (`fly.toml`) — free public URL
 - [x] Pushed to GitHub (`origin/main`)
 
 ### Tech Stack
@@ -28,23 +30,26 @@ A lightweight self-hosted utility designed to transform remote VOD M3U playlists
 
 ### File Structure
 ```
+.github/workflows/
+├── docker-build.yml  # GitHub Actions: auto-build & push to ghcr.io on push to main
 src/
-├── index.ts      # Entry point: loads config, fetches M3Us, groups by genre, starts server
-├── server.ts     # Hono web server: dashboard, M3U endpoint, channel redirect, stats
-├── parser.ts     # M3U playlist parser (remote fetch, EXTINF metadata extraction)
-├── overlay.ts    # FFmpeg branding overlay (drawtext, HLS output)
-├── slideshow.ts  # Slideshow manifest generator for filler images
-├── config.ts     # Config file loader with fallback defaults
-└── types.ts      # TypeScript interfaces (M3UEntry, Channel, Filler, Config, Stats)
-config.json       # User-editable config: M3U sources, filler URLs, branding
-Dockerfile        # node:20-slim + ffmpeg, npm install, tsc build
-docker-compose.yml # Port 3000, config.json volume mount, restart unless-stopped
-package.json      # Dependencies and scripts (dev/build/start)
-tsconfig.json     # ES2022, ESNext modules, strict mode
+├── index.ts          # Entry point: loads config, fetches M3Us, groups by genre, starts server
+├── server.ts         # Hono web server: dashboard, M3U endpoint, channel redirect, stats
+├── parser.ts         # M3U playlist parser (remote fetch, EXTINF metadata extraction)
+├── overlay.ts        # FFmpeg branding overlay (drawtext, HLS output)
+├── slideshow.ts      # Slideshow manifest generator for filler images
+├── config.ts         # Config file loader with fallback defaults
+└── types.ts          # TypeScript interfaces (M3UEntry, Channel, Filler, Config, Stats)
+config.json           # User-editable config: M3U sources, filler URLs, branding
+Dockerfile            # node:20-slim + ffmpeg, npm install, tsc build
+docker-compose.yml    # Port 3000, config.json volume mount, restart unless-stopped
+fly.toml              # Fly.io deployment config (free public URL)
+package.json          # Dependencies and scripts (dev/build/start)
+tsconfig.json         # ES2022, ESNext modules, strict mode
 ```
 
 ### Features
-- Multiple M3U source merging into unified + genre-split channels
+- Multiple M3U source merging into per-source + genre-split channels
 - Auto-created genre blocks (top 5 genres from M3U group-title)
 - Filler/commercial injection every N plays (configurable via `fillerInterval`)
 - FFmpeg branding text overlay on streams
@@ -53,6 +58,8 @@ tsconfig.json     # ES2022, ESNext modules, strict mode
 - Channel redirect-based streaming (direct to M3U URLs)
 - In-memory play statistics tracking
 - Docker support with config volume mount
+- GitHub Actions CI: auto-build & publish Docker image to ghcr.io
+- Fly.io deployment ready (`fly.toml` included)
 
 ### Configuration (`config.json`)
 
@@ -187,10 +194,31 @@ docker compose restart   # Docker
 # or restart the node process  # Local
 ```
 
-#### 8. Troubleshooting
+#### 9. Cloud Deployment
+
+**Fly.io (free — recommended):**
+```bash
+# One-time setup
+flyctl auth signup
+flyctl launch --copy-config
+flyctl deploy
+
+# Your public URL:
+# https://robbdeezenutz-streams.fly.dev
+```
+
+**Railway (free):**
+1. Go to https://railway.app
+2. "New Project" → "Deploy from GitHub repo"
+3. Select this repo, set port to 3000
+
+**GitHub Actions** auto-builds the Docker image to `ghcr.io/robbdeeze/robbdeezenutz_streams:latest` on every push to `main`.
+
+#### 10. Troubleshooting
 | Problem | Fix |
 |---------|-----|
 | "0 entries loaded" | Check M3U URLs are correct and reachable |
 | Fillers not playing | Add filler URLs to `fillers` array in config |
 | Docker build fails | Ensure Docker is running and has internet |
 | Port conflict | Change `port` in config.json |
+| Fly.io deploy fails | Run `flyctl launch --copy-config` first |
