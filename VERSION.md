@@ -176,15 +176,34 @@ npm run build && npm start
 ```
 
 #### 4. Add to IPTV Client
+
+**On the same computer:**
 - **VLC:** `Media > Open Network Stream > http://localhost:3000/channels.m3u`
-- **TiviMate:** Add playlist URL `http://your-server-ip:3000/channels.m3u`
+- **TiviMate:** Add playlist URL `http://localhost:3000/channels.m3u`
+
+**Other devices on your home network (TVs, phones, etc.):**
+1. Find your computer's local IP:
+   ```bash
+   ipconfig getifaddr en0   # macOS
+   # or
+   hostname -I              # Linux
+   ```
+2. Use that IP instead of `localhost`:
+   - VLC: `http://192.168.x.x:3000/channels.m3u`
+   - TiviMate: same URL
+   - Dashboard: `http://192.168.x.x:3000`
+
+**People outside your home (internet):**
+- Option A: [Fly.io](#9-cloud-deployment) — free, public URL, no setup on your PC
+- Option B: Port forward port 3000 on your router (advanced, security risk)
 
 #### 5. Watching Streams
-- Open `http://localhost:3000/channel/main` — redirects to current program
+- Open `http://localhost:3000/channel/movies` — redirects to current program
+- Or `http://localhost:3000/channel/tv-shows`
 - Every N plays, a random filler is served instead
 
 #### 6. Monitoring
-- **Dashboard:** `http://localhost:3000` — see channel stats and stream status
+- **Dashboard:** `http://localhost:3000` — see channel stats and current programs
 - Stats track total invocations and filler dispatches
 
 #### 7. Updating Config
@@ -193,6 +212,18 @@ Edit `config.json` and restart:
 docker compose restart   # Docker
 # or restart the node process  # Local
 ```
+
+#### 8. Local vs Cloud — Which Should You Use?
+
+| | Local (docker/npm) | Cloud (Fly.io/Railway) |
+|-|-------------------|----------------------|
+| **Who can watch?** | You + your home network | Anyone on the internet |
+| **Cost** | Free | Free (Fly.io free tier) |
+| **Setup time** | Instant | 5 minutes, needs credit card |
+| **Your PC must stay on?** | Yes | No |
+| **Best for** | Testing, personal use | Sharing with friends/family |
+
+Start local to test. If you want people outside your house to watch, use Fly.io.
 
 #### 9. Cloud Deployment
 
