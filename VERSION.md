@@ -194,8 +194,49 @@ npm run build && npm start
    - Dashboard: `http://192.168.x.x:3000`
 
 **People outside your home (internet):**
-- Option A: [Fly.io](#9-cloud-deployment) — free, public URL, no setup on your PC
-- Option B: Port forward port 3000 on your router (advanced, security risk)
+- Option A: [Fly.io](#9-cloud-deployment) — free, public URL, no setup on your PC **(recommended)**
+- Option B: Port forward port 3000 on your router (see [Port Forwarding Guide](#port-forwarding))
+
+#### Port Forwarding
+If you want people outside your home to connect directly to your PC (no cloud service):
+
+1. **Find your computer's local IP:**
+   ```bash
+   ipconfig getifaddr en0   # macOS
+   # or
+   hostname -I              # Linux
+   # or
+   ipconfig                 # Windows
+   ```
+   Example: `192.168.1.50`
+
+2. **Find your public IP:**
+   ```bash
+   curl ifconfig.me
+   ```
+   Share this with others so they can connect.
+
+3. **Log into your router** (usually `http://192.168.1.1` or `http://192.168.0.1`):
+   - Find **Port Forwarding** or **Virtual Server** in the settings
+   - Create a rule:
+     - External Port: `3000`
+     - Internal Port: `3000`
+     - Internal IP: your computer's local IP (e.g. `192.168.1.50`)
+     - Protocol: `TCP`
+
+4. **Make your computer's IP static** so it doesn't change after a reboot:
+   - Go to your router's **DHCP Reservation** or **Static Lease**
+   - Assign `192.168.1.50` to your computer's MAC address
+
+5. **Keep your PC running** with the server on (`docker compose up -d`)
+
+6. **Others can now watch at:**
+   ```
+   http://YOUR_PUBLIC_IP:3000
+   http://YOUR_PUBLIC_IP:3000/channels.m3u
+   ```
+
+**⚠️ Security note:** Port forwarding exposes your PC to the internet. Only do this if you trust everyone who gets the link. Fly.io is safer and easier.
 
 #### 5. Watching Streams
 - Open `http://localhost:3000/channel/movies` — redirects to current program
