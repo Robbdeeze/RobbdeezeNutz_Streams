@@ -8,7 +8,9 @@ A lightweight self-hosted utility designed to transform remote VOD M3U playlists
 ### Verified Working
 - [x] TypeScript builds with zero errors (strict mode)
 - [x] M3U parsing: **6,349 movies** + **6,660 TV shows** loaded = **13,009 total entries**
-- [x] Auto-generates **6 channels** by genre (Main, Action, Adventure, Animation, Comedy, Crime)
+- [x] Auto-generates **12+ channels** — per-source main + top 5 genre blocks
+- [x] Movies and TV Shows kept separate with distinct channel groups
+- [x] Placeholder channel ready for **Black TV Shows** (add URL in config.json)
 - [x] Dashboard served at `http://localhost:3000`
 - [x] M3U playlist endpoint (`/channels.m3u`) working
 - [x] Filler/commercial injection every N plays (configurable)
@@ -91,12 +93,13 @@ tsconfig.json     # ES2022, ESNext modules, strict mode
 | `GET /channel/:id` | Redirects to current program or random filler |
 
 ### Auto-Generated Channels
-Channels are created by grouping M3U entries by `group-title` metadata:
+Each M3U source gets its own main channel + top 5 genre blocks:
 
-| Channel | Source | Entries |
-|---------|--------|---------|
-| Main Unified Channel | All merged M3Us | 13,009 |
-| Genre blocks (top 5) | Per group-title | varies |
+| Source | Main Channel | Genre Blocks |
+|--------|-------------|--------------|
+| Movies | Movies | Action, Adventure, Animation, Comedy, Crime |
+| TV Shows | TV Shows | 13 Reasons Why, 15 Days, 3 Body Problem, 30 Coins, 50M² |
+| Black TV Shows | *(placeholder — add URL)* | *(auto-generated)* |
 
 ### Filler Injection Logic
 - Every `fillerInterval + 1` plays, a random filler is served instead of a program

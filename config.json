@@ -14,6 +14,10 @@
     {
       "name": "TV Shows",
       "url": "https://raw.githubusercontent.com/Robbdeeze/iptv/master/streams/vod/tv-shows.m3u"
+    },
+    {
+      "name": "Black TV Shows",
+      "url": ""
     }
   ],
   "fillers": [
